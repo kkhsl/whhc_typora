@@ -1,4 +1,6 @@
-###### 1.mysq三大范式
+# 面试题
+
+## 1.mysq三大范式
 
 1. **第一范式（1NF）**：要求数据库表的每一列都是不可分割的原子数据项，即列中不可再分，确保每列保持原子性。12
 2. **第二范式（2NF）**：在满足第一范式的基础上，非主键列必须完全依赖于主键，即每个表必须有一个主键，其他数据项与主键一一对应，消除非主属性对主键的部分依赖。
@@ -22,4 +24,44 @@
 
 
 
-# 索引
+## 2.索引
+
+## 3.监听数据库变化
+
+以下是一些常用的第三方工具，可以帮助监听数据库变化（变更数据捕获 CDC）：
+
+1. **Debezium**
+   [官网](https://debezium.io/)
+   支持多种数据库（MySQL、PostgreSQL、SQL Server、MongoDB 等）的实时变更数据捕获，通常与 Kafka 集成。
+2. **Apache Kafka Connect**
+   [官网](https://kafka.apache.org/documentation/#connect)
+   使用连接器（如 Debezium）将数据库变更推送到 Kafka，实现实时数据流处理。
+3. **Maxwell's Daemon**
+   [官网](https://maxwells-daemon.io/)
+   专门用于捕获 MySQL 的 binlog，并将数据变更以 JSON 格式推送到 Kafka 或其他消息队列。
+4. **Change Data Capture (CDC) for MySQL**
+   [官网](https://github.com/snowflakedb/connector)
+   Snowflake 提供的 CDC 解决方案，支持 MySQL 数据库的变更捕获。
+5. **GoldenGate (Oracle)**
+   [官网](https://www.oracle.com/database/goldengate/)
+   Oracle 提供的高效数据同步和变更数据捕获工具，支持多种数据库。
+6. **Apache Flink**
+   [官网](https://flink.apache.org/)
+   支持实时数据流处理，可以通过 CDC 连接器捕获数据库变更。
+7. **Striim**
+   [官网](https://www.striim.com/)
+   提供实时数据集成和变更数据捕获（CDC）解决方案，支持多个数据库和流处理平台。
+8. **TIBCO**
+   官网
+   提供数据集成工具，支持数据库变更的捕获和流处理。
+9. **Qlik Replicate (formerly Attunity)**
+   官网
+   提供实时变更数据捕获（CDC）功能，支持多个数据库平台。
+10. **Couchbase CDC**
+    [官网](https://www.couchbase.com/)
+    专为 Couchbase 数据库设计的 CDC 解决方案，支持实时数据同步。
+11. Canal
+    1. 广泛应用于分布式系统、数据同步、日志分析等场景。
+
+这些工具可以帮助你捕获数据库变更并进行实时处理、同步或分析，通常用于 ETL、数据同步、实时分析等场景。
+
