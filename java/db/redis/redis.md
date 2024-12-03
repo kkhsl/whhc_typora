@@ -1,3 +1,5 @@
+> https://www.bilibili.com/video/BV1cr4y1671t?vd_source=6daabc1bdcd781e2e91127fc6ed5a7e3&spm_id_from=333.788.videopod.episodes
+
 # 1.应用场景
 
 1. 缓存：Redis可以作为应用程序的缓存，减少数据库的读取压力，提高数据访问速度

@@ -9,20 +9,252 @@
 
 ## 1.1.应用场景
 
-> 近乎实时、检索数据；扩展性好，处理PB级别的数据
+> 近乎实时、检索数据；扩展性好，处理PB级别的数据；海量数据的搜索、分析、计算
 
 1. 
    全文搜索
 2. 日志分析
+   1. **服务器日志分析**：开发人员和运维人员可以使用 Elasticsearch 来收集服务器日志（如 Apache、Nginx、Tomcat 等），对这些日志进行索引，方便查询和分析。
+   2. **应用日志分析**：应用程序（如后台服务、微服务等）会生成大量日志，Elasticsearch 可用来集中管理这些日志数据，帮助开发者快速定位问题和分析性能瓶颈。
+   3. **异常监测与报警**：日志数据通常包含系统或应用的错误信息，通过实时分析，能够快速检测到异常（如错误日志、异常栈信息等），并且可与其他工具集成，自动触发报警通知。
+
 3. **运维监控**
+4. 数据库（mysql等）负责事务类型操作
 
 ## 1.2.安装
 
 > 见docker文档
 
+## 1.3.分词器
+
+> IK分词器（analysis-ik）https://www.alibabacloud.com/help/zh/es/user-guide/use-the-analysis-ik-plug-in
+
+
+
+### 1.规则
+
+> IK**分词器的分词规则**
+>
+> IK分词插件的分词器的分词规则包括ik_smart和ik_max_word两种：
+
+- ik_max_word：将文本按照最细粒度进行拆分，适合术语查询。
+- ik_smart：将文本按照粗粒度进行拆分，适合短语查询。
+
+### 2.作用
+
+- 创建倒排索引时对文档分词
+- 用户搜索时，对输入内容分词
+
+## 1.4.索引库
+
+#### 1.mapping
+
+> mapping是对索引库中文档的约束，常见的mapping属性包括：
+>
+> 字段名、数据类型、是否参与搜索、是否分词、分词器
+
+1. mapping常见属性
+
+   - type：数据类型
+
+     - 字符串：text（可分词文本）、keyword（精确值，例如：品牌、国家、ip地址）
+
+     - 数字：long、integer、short、byte、double、float
+     - 布尔：boolean
+     - 日期：date
+     - 对象：object
+
+   - index：是否索引
+
+   - analyzer：分词器
+
+   - properties：子字段
+
+#### 2.创建索引库
+
+ES中通过Restful请求操作索引库、文档。请求内容用DSL语句来表示。创建索引库和mapping的DSL语法如下：
+
+```json
+PUT /索引名称
+{
+    "mappings":{
+        "properties":{
+            "字段名":{
+                "type":"text",
+                "analyzer":"ik_smart"
+            },
+            "字段名2":{
+                "type":"keyword",
+                "index":"false"
+            },
+            "字段名3":{
+                "properties":{
+                    "子字段":{
+                        "type":"keyword"
+                    }
+                }
+            },
+            /// 略
+        }
+    }
+}
+```
+
+```json
+PUT /heima
+{
+	"mappings":{
+		"properties":{
+			"info":{
+				"type":"text",
+				"analyzer":"ik_smart"
+			},
+			"email":{
+				"type":"keyword",
+				"index":false
+			},
+			"name":{
+			  "type":"object",
+				"properties":{
+					"firstName":{
+						"type":"keyword"
+					},
+					"lastName":{
+						"type":"keyword"
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+#### 3.查看、删除
+
+```
+GET /索引库名
+
+示例：
+GET /heima
+```
+
+```
+DELETE /删除索引库
+
+示例：
+DELETE /heima
+```
+
+#### 4.修改索引库
+
+> 索引库和mapping一旦创建无法修改，但是可以添加新的字段
+
+```json
+PUT /索引库名/_mapping
+{
+	"properties":{
+		"新字段名"：{
+			"type":"integer"
+		}
+	}
+}
+
+```
+
+## 1.5.文档
+
+#### 1.新增文档
+
+```json
+POST /索引库名/_doc/文档id
+{
+	"字段1":"值1",
+    "字段2":"值2",
+    "字段3":{
+    	"子属性1":"值1",
+    	"子属性2":"值2",
+    }
+}
+
+POST /heima/_doc/1
+{
+	"info":"黑马程序员Java讲师",
+	"email":"123456@itcast.cn",
+	"name":{
+		"firstName":"云",
+		"lastName":"赵"
+	}
+}
+```
+
+#### 2.查看删除文档
+
+```
+# 查看文档
+GET /索引库名/_doc/1
+
+GET /heima/_doc/1
+
+# 删除文档
+DELETE /索引库名/_doc/1
+
+DELETE /heima/_doc/1
+```
+
+#### 3.修改文档
+
+> 全量修改，会删除旧文档，添加新文档
+
+```
+PUT /索引库名/_doc/文档id
+{
+	"字段1":"值1"，
+	"字段2":"值2"
+}
+
+PUT /heima/_doc/1
+{
+	"info":"黑马程序员高级java工程师",
+	"email":"123456@163.com",
+	"name":{
+		"firstName":"云",
+		"lastName":"赵"
+	}
+}
+
+```
+
+> 局部修改
+
+```
+POST /索引库名/_update/1
+{
+	"doc":{
+		"字段名":"新值"
+	}
+}
+
+POST /heima/_update/1
+{
+	"doc":{
+		"email":"123456@189.cn"
+	}
+}
+```
+
+## 1.6.RestClient操索引库
+
+
+
+### .注
+
+1. ES官方提供了各种不通语言的客户端，用来操作ES。这些客户端的本质就是组装DSL语句，通过http请求发送给ES。官方文档地址：https://www.elastic.co/guide/en/elasticsearch/client/index.html
+
 # 2.Logstash
 
 > Logstash（数据搜索）
+>
+> **Logstash 需要一个配置文件来定义输入、过滤和输出。通常，这个配置文件的后缀名为 `.conf`，例如 `logstash.conf`。确保你已经有一个配置文件**
 >
 > Logstash事件处理有三个阶段：inputs → filters → outputs。是一个接收，处理，转发日志的工具。支持系统日志，webserver日志，错误日志，应用日志，总之包括所有可以抛出来的日志类型。
 
@@ -32,14 +264,14 @@
    3. redis：从redis service中读取
    4. beats：从filebeat中读取
    5. Filters：数据中间处理，对数据进行操作
-2. 常见的过滤器行为
+2. 常见的过**滤器**行为
    1. grok：解析任意文本数据，Grok 是 Logstash 最重要的插件。它的主要作用就是将文本格式的字符串，转换成为具体的结构化的数据，配合正则表达式使用。内置120多个解析语法。
    2. mutate：对字段进行转换。例如对字段进行删除、替换、修改、重命名等。
    3. drop：丢弃一部分events不进行处理。
    4. clone：拷贝 event，这个过程中也可以添加或移除字段。
    5. geoip：添加地理信息(为前台kibana图形化展示使用)
    6. Outputs：outputs是logstash处理管道的最末端组件。一个event可以在处理过程中经过多重输出，但是一旦所有的outputs都执行结束，这个event也就完成生命周期。
-3. 一些常见的outputs为：
+3. 一些常见的**outputs**为：
    1. elasticsearch：可以高效的保存数据，并且能够方便和简单的进行查询。
    2. file：将event数据保存到文件中。
    3. graphite：将event数据发送到图形化组件中，一个很流行的开源存储图形化展示的组件。
@@ -274,20 +506,7 @@ Logstash 可以与其他系统集成，触发告警或事件。例如，当处�
 
 
 
-mapping常见属性
-
-- type：数据类型
-- index：是否索引
-- analyzer：分词器
-- properties：子字段
-
-type常见的有哪些：
-
-- 字符串：text、keyword
-- 数字：long、integer、short、byte、double、float
-- 布尔：boolean
-- 日期：date
-- 对象：object
+- 
 
 
 
